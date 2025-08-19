@@ -44,21 +44,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = useCallback(async () => {
     try {
-      console.log('Checking authentication status...');
-      
       // Check if we have a valid session
       const session = nhost.auth.getSession();
-      console.log('Session found:', !!session);
       
       if (session) {
         // Check if the session is still valid
         const isAuthenticated = nhost.auth.isAuthenticated();
-        console.log('Is authenticated:', isAuthenticated);
         
         if (isAuthenticated) {
           try {
             const userData = await nhost.auth.getUser();
-            console.log('User data retrieved:', !!userData);
             
             if (userData) {
               const user: User = {
@@ -69,7 +64,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 createdAt: userData.createdAt || new Date().toISOString(),
               };
               setUser(user);
-              console.log('User set successfully:', user.email);
             }
           } catch (userError) {
             console.error('Failed to get user data:', userError);
@@ -78,11 +72,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(null);
           }
         } else {
-          console.log('Session exists but not authenticated, clearing user');
           setUser(null);
         }
       } else {
-        console.log('No session found, user is not authenticated');
         setUser(null);
       }
     } catch (error) {
@@ -96,16 +88,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    console.log('AuthProvider mounted, checking auth...');
     checkAuth();
 
     // Listen for auth state changes
     const unsubscribe = nhost.auth.onAuthStateChanged(async (event, session) => {
-      console.log('Auth state changed:', event, !!session);
-      
       try {
         if (event === 'SIGNED_IN' && session) {
-          console.log('User signed in, getting user data...');
           const userData = await nhost.auth.getUser();
           if (userData) {
             const user: User = {
@@ -116,20 +104,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               createdAt: userData.createdAt || new Date().toISOString(),
             };
             setUser(user);
-            console.log('User signed in successfully:', user.email);
           }
         } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out, clearing user data');
           setUser(null);
         } else if (String(event) === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed, re-checking auth');
           await checkAuth();
         }
       } catch (error) {
         console.error('Auth state change error:', error);
         if (event === 'SIGNED_IN') {
           // If we can't get user data after sign in, sign out
-          console.log('Failed to get user data after sign in, signing out');
           await nhost.auth.signOut();
         }
       }
@@ -137,7 +121,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen for token changes
     const tokenUnsubscribe = nhost.auth.onTokenChanged((session) => {
-      console.log('Token changed:', !!session);
       if (session) {
         // Token was refreshed, re-check authentication
         checkAuth();
@@ -151,7 +134,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [checkAuth]);
 
   const login = async (email: string, password: string) => {
-    console.log('Attempting login for:', email);
     setIsLoading(true);
     try {
       const { error } = await retryOperation(() => 
@@ -162,13 +144,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       if (error) {
-        console.error('Login error from Nhost:', error);
         throw new Error(error.message);
       }
-      
-      console.log('Login successful for:', email);
     } catch (error) {
-      console.error('Login error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -176,7 +154,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signup = async (email: string, password: string, displayName?: string) => {
-    console.log('Attempting signup for:', email);
     setIsLoading(true);
     try {
       const { error } = await retryOperation(() => 
@@ -190,13 +167,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
 
       if (error) {
-        console.error('Signup error from Nhost:', error);
         throw new Error(error.message);
       }
-      
-      console.log('Signup successful for:', email);
     } catch (error) {
-      console.error('Signup error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -204,14 +177,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    console.log('Attempting logout');
     setIsLoading(true);
     try {
       await retryOperation(() => nhost.auth.signOut());
       setUser(null);
-      console.log('Logout successful');
     } catch (error) {
-      console.error('Logout error:', error);
       // Even if logout fails, clear local state
       setUser(null);
     } finally {
@@ -220,7 +190,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const refreshAuth = async () => {
-    console.log('Refreshing authentication');
     try {
       await checkAuth();
     } catch (error) {
@@ -228,15 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Log current state for debugging
-  useEffect(() => {
-    console.log('Auth state updated:', {
-      user: user ? { id: user.id, email: user.email } : null,
-      isAuthenticated: !!user,
-      isLoading,
-      isInitialized,
-    });
-  }, [user, isLoading, isInitialized]);
+
 
   return (
     <AuthContext.Provider value={{

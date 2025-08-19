@@ -10,6 +10,7 @@ import { NhostClient } from '@nhost/nhost-js';
 const requiredEnvVars = {
   VITE_NHOST_AUTH_URL: import.meta.env.VITE_NHOST_AUTH_URL,
   VITE_NHOST_GRAPHQL_URL: import.meta.env.VITE_NHOST_GRAPHQL_URL,
+  VITE_NHOST_WEBSOCKET_URL: import.meta.env.VITE_NHOST_WEBSOCKET_URL,
 };
 
 // Check for missing environment variables
@@ -24,9 +25,7 @@ if (missingVars.length > 0) {
   );
 }
 
-// Log WebSocket configuration
-console.log('GraphQL URL:', requiredEnvVars.VITE_NHOST_GRAPHQL_URL);
-console.log('WebSocket URL:', requiredEnvVars.VITE_NHOST_GRAPHQL_URL!.replace('http', 'ws').replace('https', 'wss'));
+
 
 // Create Nhost client with proper configuration
 export const nhost = new NhostClient({
@@ -48,7 +47,7 @@ const httpLink = createHttpLink({
 });
 
 // WebSocket link for GraphQL subscriptions
-const wsUrl = requiredEnvVars.VITE_NHOST_GRAPHQL_URL!.replace('/v1', '/v1/graphql').replace('https', 'wss');
+const wsUrl = requiredEnvVars.VITE_NHOST_WEBSOCKET_URL!;
 
 // Only create WebSocket link if we have a valid WebSocket URL
 let wsLink: GraphQLWsLink | null = null;
@@ -68,8 +67,6 @@ try {
         setTimeout(resolve, Math.min(1000 * Math.pow(2, retryCount), 10000))
       ),
       on: {
-        connected: () => console.log('WebSocket connected for subscriptions'),
-        closed: () => console.log('WebSocket closed'),
         error: (error) => console.error('WebSocket error:', error),
       },
     })
@@ -112,28 +109,18 @@ const authLink = setContext(async (_, { headers }) => {
 });
 
 // Error link for handling GraphQL errors
-const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
-    graphQLErrors.forEach(({ message, locations, path, extensions }) => {
-      console.error(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      );
-      
+    graphQLErrors.forEach(({ message, extensions }) => {
       // Handle authentication errors
       if (extensions?.code === 'UNAUTHENTICATED') {
         console.warn('User is not authenticated, redirecting to login...');
-        // You can add navigation logic here if needed
       }
     });
   }
   
-  if (networkError) {
-    console.error(`[Network error]: ${networkError}`);
-    
-    // Handle network errors gracefully
-    if ('statusCode' in networkError && networkError.statusCode === 401) {
-      console.warn('Unauthorized request, user may need to re-authenticate');
-    }
+  if (networkError && 'statusCode' in networkError && networkError.statusCode === 401) {
+    console.warn('Unauthorized request, user may need to re-authenticate');
   }
 });
 
@@ -151,6 +138,12 @@ export const apolloClient = new ApolloClient({
             merge: false, // Don't merge, replace completely
           },
         },
+      },
+      Message: {
+        keyFields: ['id'],
+      },
+      Chat: {
+        keyFields: ['id'],
       },
     },
   }),

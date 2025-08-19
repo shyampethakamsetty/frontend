@@ -14,6 +14,8 @@ export default function ChatPage() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const { toast } = useToast();
 
+
+
   // Query chats
   const { data: chatsData, loading: chatsLoading, refetch: refetchChats } = useQuery(GET_CHATS, {
     onError: (error) => {
@@ -129,7 +131,6 @@ export default function ChatPage() {
 
   const handleMessageSent = () => {
     // Messages will be updated via subscription
-    // We can add additional logic here if needed
   };
 
   if (chatsLoading) {
