@@ -9,16 +9,8 @@ interface MessageBubbleProps {
 export function MessageBubble({ message, isOwnMessage }: MessageBubbleProps) {
   const formatDate = (date: Date | string) => {
     try {
-      // Parse the date string and let JavaScript handle timezone conversion automatically
       const dateObj = typeof date === 'string' ? new Date(date) : date;
       
-      // Debug: Let's see what we're getting
-      console.log('Original date:', date);
-      console.log('Parsed date obj:', dateObj);
-      console.log('Local time string:', dateObj.toLocaleString());
-      console.log('UTC time string:', dateObj.toUTCString());
-      
-      // JavaScript Date automatically converts to local timezone when formatting
       if (isToday(dateObj)) {
         // Today: show time only (e.g., "2:30 PM")
         return format(dateObj, 'h:mm a');

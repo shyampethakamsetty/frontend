@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import type { Chat } from '@/types/graphql';
-import { formatDistanceToNow } from 'date-fns';
+import { format, isToday, isYesterday, isThisWeek, isThisYear, formatDistanceToNow } from 'date-fns';
 
 interface ChatListProps {
   chats: Chat[];
@@ -15,6 +15,31 @@ export default function ChatList({ chats, selectedChat, onSelectChat, onCreateNe
   const { logout } = useAuth();
 
   const formatDate = (date: Date | string) => {
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      
+      if (isToday(dateObj)) {
+        // Today: show time only (e.g., "2:30 PM")
+        return format(dateObj, 'h:mm a');
+      } else if (isYesterday(dateObj)) {
+        // Yesterday: show "Yesterday at 2:30 PM"
+        return `Yesterday at ${format(dateObj, 'h:mm a')}`;
+      } else if (isThisWeek(dateObj)) {
+        // This week: show day and time (e.g., "Mon, 2:30 PM")
+        return format(dateObj, 'EEE, h:mm a');
+      } else if (isThisYear(dateObj)) {
+        // This year: show month, day and time (e.g., "Jan 15, 2:30 PM")
+        return format(dateObj, 'MMM d, h:mm a');
+      } else {
+        // Older: show full date and time (e.g., "Dec 15, 2023, 2:30 PM")
+        return format(dateObj, 'MMM d, yyyy, h:mm a');
+      }
+    } catch {
+      return 'Unknown';
+    }
+  };
+
+  const formatRelativeTime = (date: Date | string) => {
     try {
       const dateObj = typeof date === 'string' ? new Date(date) : date;
       return formatDistanceToNow(dateObj, { addSuffix: true });
@@ -65,11 +90,15 @@ export default function ChatList({ chats, selectedChat, onSelectChat, onCreateNe
                   <h3 className="font-semibold text-gray-200 truncate group-hover:text-white transition-colors" data-testid={`text-chat-title-${chat.id}`}>
                     {chat.title}
                   </h3>
-                  <p className="text-sm text-gray-400 truncate mt-1" data-testid={`text-chat-preview-${chat.id}`}>
-                    {/* Show creation date as preview since we don't have last message */}
-                    Created {formatDate(chat.created_at)}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-2" data-testid={`text-chat-date-${chat.id}`}>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded-full">
+                      Created
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {formatRelativeTime(chat.created_at)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2" data-testid={`text-chat-date-${chat.id}`}>
                     {formatDate(chat.created_at)}
                   </p>
                 </div>
