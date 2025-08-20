@@ -1,4 +1,4 @@
-import { formatDistanceToNow } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 import type { Message } from '@/types/graphql';
 
 interface MessageBubbleProps {
@@ -9,8 +9,26 @@ interface MessageBubbleProps {
 export function MessageBubble({ message, isOwnMessage }: MessageBubbleProps) {
   const formatDate = (date: Date | string) => {
     try {
+      // Parse the date string and let JavaScript handle timezone conversion automatically
       const dateObj = typeof date === 'string' ? new Date(date) : date;
-      return formatDistanceToNow(dateObj, { addSuffix: true });
+      
+      // Debug: Let's see what we're getting
+      console.log('Original date:', date);
+      console.log('Parsed date obj:', dateObj);
+      console.log('Local time string:', dateObj.toLocaleString());
+      console.log('UTC time string:', dateObj.toUTCString());
+      
+      // JavaScript Date automatically converts to local timezone when formatting
+      if (isToday(dateObj)) {
+        // Today: show time only (e.g., "2:30 PM")
+        return format(dateObj, 'h:mm a');
+      } else if (isYesterday(dateObj)) {
+        // Yesterday: show "Yesterday at 2:30 PM"
+        return `Yesterday at ${format(dateObj, 'h:mm a')}`;
+      } else {
+        // Older: show date and time (e.g., "Jan 15, 2:30 PM")
+        return format(dateObj, 'MMM d, h:mm a');
+      }
     } catch {
       return 'Unknown';
     }
@@ -33,7 +51,7 @@ export function MessageBubble({ message, isOwnMessage }: MessageBubbleProps) {
             {isOwnMessage ? 'You' : 'AI Assistant'}
           </span>
         </div>
-        <div className={`rounded-2xl p-4 ${
+        <div className={`rounded-2xl p-4 relative ${
           isOwnMessage 
             ? 'message-bubble-user rounded-br-md' 
             : 'message-bubble-bot rounded-bl-md'

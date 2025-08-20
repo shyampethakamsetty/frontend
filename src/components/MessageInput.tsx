@@ -3,8 +3,9 @@ import { useMutation } from '@apollo/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Send, Loader2 } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { SEND_MESSAGE } from '@/graphql/mutations';
+import { GET_MESSAGES } from '@/graphql/queries';
 import type { Message } from '@/types/graphql';
 
 interface MessageInputProps {
@@ -19,13 +20,9 @@ export default function MessageInput({ chat_id, onMessageSent, disabled = false,
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
 
-  const [sendMessage, { loading: isSending }] = useMutation(SEND_MESSAGE, {
+  const [sendMessage] = useMutation(SEND_MESSAGE, {
     onCompleted: () => {
-      toast({
-        title: 'Success',
-        description: 'Message sent successfully',
-      });
-      onMessageSent();
+      // Message sent successfully - optimistic update already handled
     },
     onError: (error) => {
       toast({
@@ -51,32 +48,89 @@ export default function MessageInput({ chat_id, onMessageSent, disabled = false,
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!message.trim() || isSending || disabled) return;
+    if (!message.trim() || disabled) return;
 
     const messageText = message.trim();
-    setMessage('');
-
-    try {
-      // If no chat_id is provided, we can't send a message
-      if (!chat_id) {
-        toast({
-          title: 'No Chat Selected',
-          description: 'Please select a chat or create a new one to send messages',
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      await sendMessage({
-        variables: {
-          chat_id: chat_id,
-          message: messageText,
-        },
+    
+    // If no chat_id is provided, we can't send a message
+    if (!chat_id) {
+      toast({
+        title: 'No Chat Selected',
+        description: 'Please select a chat or create a new one to send messages',
+        variant: 'destructive',
       });
-    } catch (error) {
-      // Error is handled by onError callback
-      setMessage(messageText); // Restore message on error
+      return;
     }
+
+    // Clear message immediately for instant feedback
+    setMessage('');
+    
+    // Show typing indicator immediately when user sends message
+    onMessageSent();
+    
+    // Add instant visual feedback
+    const button = e.currentTarget.querySelector('button[type="submit"]');
+    if (button) {
+      button.classList.add('bg-green-500');
+      setTimeout(() => button.classList.remove('bg-green-500'), 200);
+    }
+
+    // Generate temporary ID for optimistic update
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
+    const now = new Date().toISOString();
+    const optimisticMessage: Message = {
+      id: tempId,
+      message: messageText,
+      sender: 'user',
+      created_at: now,
+      chat_id: chat_id,
+    };
+    
+    // Send message with optimistic update
+    sendMessage({
+      variables: {
+        chat_id: chat_id,
+        message: messageText,
+      },
+      optimisticResponse: {
+        sendMessage: optimisticMessage,
+      },
+      update: (cache, { data }) => {
+        // Add optimistic message immediately
+        try {
+          const existingMessages = cache.readQuery<{ messages: Message[] }>({
+            query: GET_MESSAGES,
+            variables: { chat_id },
+          });
+
+          if (existingMessages?.messages) {
+            // Check if this is the real response (not optimistic)
+            const newMessage = data?.sendMessage || optimisticMessage;
+            
+            // Avoid duplicates by checking if message already exists
+            const messageExists = existingMessages.messages.some(
+              msg => msg.id === newMessage.id || (msg.message === newMessage.message && msg.sender === newMessage.sender)
+            );
+
+            if (!messageExists) {
+              cache.writeQuery({
+                query: GET_MESSAGES,
+                variables: { chat_id },
+                data: {
+                  messages: [...existingMessages.messages, newMessage],
+                },
+              });
+            }
+          }
+        } catch (error) {
+          // Silently handle cache errors
+          console.warn('Cache update error:', error);
+        }
+      },
+    }).catch(() => {
+      // Only restore message on error
+      setMessage(messageText);
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -95,23 +149,19 @@ export default function MessageInput({ chat_id, onMessageSent, disabled = false,
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="message-textarea w-full px-4 py-3 rounded-lg focus:outline-none resize-none min-h-[52px] max-h-[120px] text-white"
+            className="message-textarea w-full px-4 py-4 rounded-lg focus:outline-none resize-none min-h-[52px] max-h-[120px] text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder={placeholder}
-            disabled={isSending || disabled}
+            disabled={disabled}
             data-testid="textarea-message-input"
           />
         </div>
         <Button
           type="submit"
-          disabled={!message.trim() || isSending || disabled || !chat_id}
-          className="send-button px-6 py-4 rounded-lg flex items-center justify-center group min-h-[52px]"
+          disabled={!message.trim() || disabled || !chat_id}
+          className="send-button px-6 py-4 rounded-lg flex items-center justify-center group min-h-[52px] hover:scale-105 active:scale-95 transition-all duration-150"
           data-testid="button-send-message"
         >
-          {isSending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Send className="h-4 w-4" />
-          )}
+          <Send className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
         </Button>
       </form>
       <div className="mt-3 flex items-center justify-center text-xs text-muted-foreground">

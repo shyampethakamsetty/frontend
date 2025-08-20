@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react';
 
 export default function ChatPage() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
   const { toast } = useToast();
 
 
@@ -90,6 +91,15 @@ export default function ChatPage() {
     skip: !selectedChat?.id,
     onData: ({ data }) => {
       if (data?.data?.messages) {
+        // Check if the latest message is from AI (not user)
+        const latestMessage = data.data.messages[data.data.messages.length - 1];
+        
+        if (latestMessage && latestMessage.sender === 'bot') {
+          // Hide typing indicator immediately before refetch
+          setIsTyping(false);
+        }
+        
+        // Refetch messages after handling typing state
         refetchMessages();
       }
     },
@@ -104,6 +114,16 @@ export default function ChatPage() {
       setSelectedChat(chatsData.chats[0]);
     }
   }, [chatsData?.chats, selectedChat]);
+
+  // Hide typing indicator when bot message appears in messages
+  useEffect(() => {
+    if (messagesData?.messages && messagesData.messages.length > 0) {
+      const latestMessage = messagesData.messages[messagesData.messages.length - 1];
+      if (latestMessage && latestMessage.sender === 'bot' && isTyping) {
+        setIsTyping(false);
+      }
+    }
+  }, [messagesData?.messages, isTyping]);
 
   const handleCreateNewChat = async () => {
     try {
@@ -130,7 +150,13 @@ export default function ChatPage() {
   };
 
   const handleMessageSent = () => {
-    // Messages will be updated via subscription
+    // Show typing indicator immediately when user sends message
+    setIsTyping(true);
+    
+    // Fallback: hide typing indicator after 10 seconds if no AI response
+    setTimeout(() => {
+      setIsTyping(false);
+    }, 10000);
   };
 
   if (chatsLoading) {
@@ -163,6 +189,7 @@ export default function ChatPage() {
           messages={messages}
           onMessageSent={handleMessageSent}
           isLoading={messagesLoading || createChatLoading}
+          isTyping={isTyping}
         />
       </div>
     </div>

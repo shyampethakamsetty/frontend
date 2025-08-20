@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import MessageInput from '@/components/MessageInput';
 import { MessageBubble } from '@/components/MessageBubble';
 import type { Chat, Message } from '@/types/graphql';
-import { formatDistanceToNow } from 'date-fns';
+
 import { Bot, User, MessageSquare } from 'lucide-react';
 
 interface ChatWindowProps {
@@ -10,16 +10,19 @@ interface ChatWindowProps {
   messages: Message[];
   onMessageSent: () => void;
   isLoading?: boolean;
+  isTyping?: boolean;
 }
 
 export default function ChatWindow({ 
   selectedChat, 
   messages, 
   onMessageSent, 
-  isLoading = false 
+  isLoading = false,
+  isTyping = false
 }: ChatWindowProps) {
-  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -29,23 +32,10 @@ export default function ChatWindow({
     scrollToBottom();
   }, [messages]);
 
-  const formatDate = (date: Date | string) => {
-    try {
-      const dateObj = typeof date === 'string' ? new Date(date) : date;
-      return formatDistanceToNow(dateObj, { addSuffix: true });
-    } catch {
-      return 'Unknown';
-    }
-  };
+
 
   const handleMessageSent = () => {
-    setIsTyping(true);
     onMessageSent();
-    
-    // Hide typing indicator after AI response (simulated)
-    setTimeout(() => {
-      setIsTyping(false);
-    }, 3000);
   };
 
   if (!selectedChat) {
@@ -75,7 +65,6 @@ export default function ChatWindow({
             chat_id=""
             onMessageSent={() => {
               // If no chat is selected, this will create a new chat
-              console.log('Message sent without chat selection');
             }}
             disabled={false}
             placeholder="Select a chat to start messaging..."
@@ -129,7 +118,7 @@ export default function ChatWindow({
 
         {/* Typing Indicator */}
         {isTyping && (
-          <div className="flex justify-start animate-in slide-in-from-bottom-2" data-testid="typing-indicator">
+          <div className="flex justify-start animate-in slide-in-from-bottom-2 duration-200" data-testid="typing-indicator">
             <div className="max-w-2xl">
               <div className="flex items-center mb-3 space-x-2">
                 <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
