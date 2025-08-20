@@ -30,74 +30,74 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]" data-testid="profile-modal">
+      <DialogContent className="sm:max-w-[425px] max-w-[95vw] max-h-[90vh] overflow-y-auto" data-testid="profile-modal">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <User className="h-5 w-5" />
             Profile Details
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm sm:text-base">
             View your account information and settings.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6 py-4">
+        <div className="space-y-4 sm:space-y-6 py-2 sm:py-4">
           {/* Profile Avatar */}
           <div className="flex justify-center">
-            <div className="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-800 flex items-center justify-center">
               {user.avatarUrl ? (
                 <img
                   src={user.avatarUrl}
                   alt="Profile"
-                  className="w-20 h-20 rounded-full object-cover"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover"
                 />
               ) : (
-                <User className="h-10 w-10 text-gray-400" />
+                <User className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" />
               )}
             </div>
           </div>
 
           {/* User Information */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <User className="h-5 w-5 text-blue-500" />
-              <div className="flex-1">
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <User className="h-5 w-5 text-blue-500 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
                   Display Name
                 </label>
-                <p className="text-sm font-semibold" data-testid="profile-display-name">
+                <p className="text-xs sm:text-sm font-semibold truncate" data-testid="profile-display-name">
                   {user.displayName || 'Not set'}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <Mail className="h-5 w-5 text-green-500" />
-              <div className="flex-1">
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <Mail className="h-5 w-5 text-green-500 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
                   Email Address
                 </label>
-                <p className="text-sm font-semibold break-all" data-testid="profile-email">
+                <p className="text-xs sm:text-sm font-semibold break-all" data-testid="profile-email">
                   {user.email}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <Calendar className="h-5 w-5 text-purple-500" />
-              <div className="flex-1">
-                <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              <Calendar className="h-5 w-5 text-purple-500 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <label className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
                   Member Since
                 </label>
-                <p className="text-sm font-semibold" data-testid="profile-created-date">
+                <p className="text-xs sm:text-sm font-semibold" data-testid="profile-created-date">
                   {formatDate(user.createdAt)}
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <Key className="h-5 w-5 text-orange-500" />
-              <div className="flex-1">
+              <Key className="h-5 w-5 text-orange-500 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
                 <label className="text-sm font-medium text-gray-600 dark:text-gray-400">
                   User ID
                 </label>

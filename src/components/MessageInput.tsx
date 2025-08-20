@@ -13,9 +13,10 @@ interface MessageInputProps {
   onMessageSent: () => void;
   disabled?: boolean;
   placeholder?: string;
+  isMobile?: boolean;
 }
 
-export default function MessageInput({ chat_id, onMessageSent, disabled = false, placeholder = "Type your message..." }: MessageInputProps) {
+export default function MessageInput({ chat_id, onMessageSent, disabled = false, placeholder = "Type your message...", isMobile = false }: MessageInputProps) {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
@@ -141,15 +142,15 @@ export default function MessageInput({ chat_id, onMessageSent, disabled = false,
   };
 
   return (
-    <div className="message-input-container p-6">
-      <form className="flex items-end space-x-4" onSubmit={handleSubmit}>
+    <div className={`message-input-container ${isMobile ? 'p-3' : 'p-6'}`}>
+      <form className="flex items-end space-x-2 lg:space-x-4" onSubmit={handleSubmit}>
         <div className="flex-1">
           <Textarea
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="message-textarea w-full px-4 py-4 rounded-lg focus:outline-none resize-none min-h-[52px] max-h-[120px] text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="message-textarea w-full px-3 lg:px-4 py-3 lg:py-4 rounded-lg focus:outline-none resize-none min-h-[48px] lg:min-h-[52px] max-h-[120px] text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder={placeholder}
             disabled={disabled}
             data-testid="textarea-message-input"
@@ -158,13 +159,13 @@ export default function MessageInput({ chat_id, onMessageSent, disabled = false,
         <Button
           type="submit"
           disabled={!message.trim() || disabled || !chat_id}
-          className="send-button px-6 py-4 rounded-lg flex items-center justify-center group min-h-[52px] hover:scale-105 active:scale-95 transition-all duration-150"
+          className="send-button px-4 lg:px-6 py-3 lg:py-4 rounded-lg flex items-center justify-center group min-h-[48px] lg:min-h-[52px] hover:scale-105 active:scale-95 transition-all duration-150"
           data-testid="button-send-message"
         >
           <Send className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
         </Button>
       </form>
-      <div className="mt-3 flex items-center justify-center text-xs text-muted-foreground">
+      <div className="mt-2 lg:mt-3 flex items-center justify-center text-xs text-muted-foreground px-2">
         <i className="fas fa-info-circle mr-1"></i>
         Press Enter to send, Shift+Enter for new line
       </div>

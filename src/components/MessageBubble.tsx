@@ -4,9 +4,10 @@ import type { Message } from '@/types/graphql';
 interface MessageBubbleProps {
   message: Message;
   isOwnMessage: boolean;
+  isMobile?: boolean;
 }
 
-export function MessageBubble({ message, isOwnMessage }: MessageBubbleProps) {
+export function MessageBubble({ message, isOwnMessage, isMobile = false }: MessageBubbleProps) {
   const formatDate = (date: Date | string) => {
     try {
       const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -28,31 +29,31 @@ export function MessageBubble({ message, isOwnMessage }: MessageBubbleProps) {
 
   return (
     <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-2xl ${isOwnMessage ? 'order-2' : 'order-1'}`}>
-        <div className="flex items-center mb-3 space-x-2">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+      <div className={`${isMobile ? 'max-w-full' : 'max-w-2xl'} ${isOwnMessage ? 'order-2' : 'order-1'}`}>
+        <div className="flex items-center mb-2 lg:mb-3 space-x-2">
+          <div className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} rounded-full flex items-center justify-center flex-shrink-0 ${
             isOwnMessage ? 'user-avatar' : 'bg-muted'
           }`}>
             {isOwnMessage ? (
-              <i className="fas fa-user text-black text-sm"></i>
+              <i className={`fas fa-user text-black ${isMobile ? 'text-xs' : 'text-sm'}`}></i>
             ) : (
-              <i className="fas fa-robot text-muted-foreground text-sm"></i>
+              <i className={`fas fa-robot text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}></i>
             )}
           </div>
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className={`font-medium text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>
             {isOwnMessage ? 'You' : 'AI Assistant'}
           </span>
         </div>
-        <div className={`rounded-2xl p-4 relative ${
+        <div className={`rounded-2xl ${isMobile ? 'p-3' : 'p-4'} relative ${
           isOwnMessage 
             ? 'message-bubble-user rounded-br-md' 
             : 'message-bubble-bot rounded-bl-md'
         }`}>
-          <p className="text-sm leading-relaxed">
+          <p className={`leading-relaxed ${isMobile ? 'text-sm' : 'text-sm'}`}>
             {message.message}
           </p>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 ml-12">
+        <p className={`text-muted-foreground mt-2 ${isMobile ? 'ml-8 text-xs' : 'ml-12 text-xs'}`}>
           {formatDate(message.created_at)}
         </p>
       </div>

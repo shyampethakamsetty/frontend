@@ -1,6 +1,6 @@
 import * as React from "react"
 
-const MOBILE_BREAKPOINT = 768
+const MOBILE_BREAKPOINT = 1024 // Changed from 768 to 1024 for better tablet support
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
@@ -16,4 +16,31 @@ export function useIsMobile() {
   }, [])
 
   return !!isMobile
+}
+
+// Additional mobile detection utilities
+export function useIsTouchDevice() {
+  const [isTouch, setIsTouch] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0)
+  }, [])
+
+  return isTouch
+}
+
+export function useIsSmallScreen() {
+  const [isSmall, setIsSmall] = React.useState(false)
+
+  React.useEffect(() => {
+    const checkSize = () => {
+      setIsSmall(window.innerWidth < 640) // sm breakpoint
+    }
+    
+    checkSize()
+    window.addEventListener('resize', checkSize)
+    return () => window.removeEventListener('resize', checkSize)
+  }, [])
+
+  return isSmall
 }

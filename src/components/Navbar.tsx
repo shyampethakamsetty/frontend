@@ -9,14 +9,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { User, Settings, LogOut, Mail, Calendar } from 'lucide-react';
+import { User, Settings, LogOut, Mail, Calendar, Menu } from 'lucide-react';
 import { ProfileModal } from '@/components/ProfileModal';
 
 interface NavbarProps {
   currentChatTitle?: string;
+  onMenuClick?: () => void;
+  isMobile?: boolean;
 }
 
-export default function Navbar({ currentChatTitle }: NavbarProps) {
+export default function Navbar({ currentChatTitle, onMenuClick, isMobile }: NavbarProps) {
   const { user, logout } = useAuth();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
@@ -28,32 +30,49 @@ export default function Navbar({ currentChatTitle }: NavbarProps) {
     <nav className="glass-card border-b border-gray-800 p-4 w-full">
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center space-x-3">
+          {/* Mobile Menu Button */}
+          {isMobile && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onMenuClick}
+              className="p-2 mr-2 lg:hidden"
+              data-testid="mobile-menu-button"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          )}
+          
           <div className="robot-icon w-8 h-8 flex items-center justify-center">
             <i className="fas fa-robot text-black text-sm"></i>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold metallic-text" data-testid="text-navbar-title">
+          <div className={isMobile ? "min-w-0 flex-1" : ""}>
+            <h1 className={`font-bold metallic-text ${isMobile ? 'text-lg' : 'text-2xl'}`} data-testid="text-navbar-title">
               AI Chat
             </h1>
             {currentChatTitle && (
-              <p className="text-sm text-gray-400 mt-1" data-testid="text-current-chat">
+              <p className={`text-gray-400 mt-1 ${isMobile ? 'text-xs truncate' : 'text-sm'}`} data-testid="text-current-chat">
                 {currentChatTitle}
               </p>
             )}
           </div>
         </div>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 lg:space-x-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="flex items-center space-x-3 cursor-pointer hover:bg-gray-800/50 rounded-lg px-3 py-2 transition-colors" data-testid="profile-trigger">
-                <div className="user-avatar w-8 h-8 flex items-center justify-center">
+              <div className={`flex items-center space-x-2 lg:space-x-3 cursor-pointer hover:bg-gray-800/50 rounded-lg px-2 lg:px-3 py-2 transition-colors ${isMobile ? 'min-w-0' : ''}`} data-testid="profile-trigger">
+                <div className="user-avatar w-8 h-8 flex items-center justify-center flex-shrink-0">
                   <User className="h-4 w-4 text-black" />
                 </div>
-                <span className="text-sm text-white font-medium" data-testid="text-user-name">
-                  {user?.displayName || user?.email}
-                </span>
-                <i className="fas fa-chevron-down text-gray-400 text-xs"></i>
+                {!isMobile && (
+                  <>
+                    <span className="text-sm text-white font-medium hidden sm:block" data-testid="text-user-name">
+                      {user?.displayName || user?.email}
+                    </span>
+                    <i className="fas fa-chevron-down text-gray-400 text-xs hidden sm:block"></i>
+                  </>
+                )}
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64" align="end" data-testid="profile-dropdown">

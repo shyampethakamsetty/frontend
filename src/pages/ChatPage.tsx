@@ -8,13 +8,22 @@ import ChatWindow from '@/components/ChatWindow';
 import Navbar from '@/components/Navbar';
 import type { Chat, Message } from '@/types/graphql';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Menu, X } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function ChatPage() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
+  // Close sidebar when chat is selected on mobile
+  useEffect(() => {
+    if (isMobile && selectedChat) {
+      setIsSidebarOpen(false);
+    }
+  }, [selectedChat, isMobile]);
 
 
   // Query chats
@@ -175,22 +184,48 @@ export default function ChatPage() {
 
   return (
     <div className="h-screen flex flex-col bg-background">
-      <Navbar currentChatTitle={selectedChat?.title} />
-      <div className="flex-1 flex overflow-hidden">
-        <ChatList
-          chats={chats}
-          selectedChat={selectedChat}
-          onSelectChat={handleSelectChat}
-          onCreateNewChat={handleCreateNewChat}
-          onDeleteChat={handleDeleteChat}
-        />
-        <ChatWindow
-          selectedChat={selectedChat}
-          messages={messages}
-          onMessageSent={handleMessageSent}
-          isLoading={messagesLoading || createChatLoading}
-          isTyping={isTyping}
-        />
+      <Navbar 
+        currentChatTitle={selectedChat?.title} 
+        onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        isMobile={isMobile}
+      />
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Mobile Sidebar Overlay */}
+        {isMobile && isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+        
+        {/* Chat List - Mobile Sidebar */}
+        <div className={`
+          ${isMobile ? 'fixed left-0 top-0 h-full z-50 transform transition-transform duration-300 ease-in-out' : 'relative'}
+          ${isMobile && !isSidebarOpen ? '-translate-x-full' : 'translate-x-0'}
+          ${!isMobile ? 'w-80' : 'w-80 max-w-[85vw]'}
+        `}>
+          <ChatList
+            chats={chats}
+            selectedChat={selectedChat}
+            onSelectChat={handleSelectChat}
+            onCreateNewChat={handleCreateNewChat}
+            onDeleteChat={handleDeleteChat}
+            isMobile={isMobile}
+            onClose={() => setIsSidebarOpen(false)}
+          />
+        </div>
+        
+        {/* Chat Window */}
+        <div className={`flex-1 ${!isMobile ? 'ml-0' : ''}`}>
+          <ChatWindow
+            selectedChat={selectedChat}
+            messages={messages}
+            onMessageSent={handleMessageSent}
+            isLoading={messagesLoading || createChatLoading}
+            isTyping={isTyping}
+            isMobile={isMobile}
+          />
+        </div>
       </div>
     </div>
   );
