@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Send } from 'lucide-react';
-import { SEND_MESSAGE } from '@/graphql/mutations';
+import { SEND_MESSAGE, UPDATE_CHAT } from '@/graphql/mutations';
 import { GET_MESSAGES } from '@/graphql/queries';
 import type { Message } from '@/types/graphql';
+import { GET_CHATS } from '@/graphql/queries';
 
 interface MessageInputProps {
   chat_id: string;
@@ -14,9 +15,19 @@ interface MessageInputProps {
   disabled?: boolean;
   placeholder?: string;
   isMobile?: boolean;
+  isFirstMessage?: boolean;
+  onTitleUpdate?: (title: string) => void;
 }
 
-export default function MessageInput({ chat_id, onMessageSent, disabled = false, placeholder = "Type your message...", isMobile = false }: MessageInputProps) {
+export default function MessageInput({ 
+  chat_id, 
+  onMessageSent, 
+  disabled = false, 
+  placeholder = "Type your message...", 
+  isMobile = false,
+  isFirstMessage = false,
+  onTitleUpdate
+}: MessageInputProps) {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
@@ -31,6 +42,48 @@ export default function MessageInput({ chat_id, onMessageSent, disabled = false,
         description: `Failed to send message: ${error.message}`,
         variant: 'destructive',
       });
+    },
+  });
+
+  const [updateChat] = useMutation(UPDATE_CHAT, {
+    onCompleted: (data) => {
+      // Chat title updated successfully
+      if (onTitleUpdate && data?.update_chats_by_pk?.title) {
+        onTitleUpdate(data.update_chats_by_pk.title);
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: `Failed to update chat title: ${error.message}`,
+        variant: 'destructive',
+      });
+    },
+    update: (cache, { data }) => {
+      // Update the chat in the chat list cache
+      try {
+        const chatId = data?.update_chats_by_pk?.id;
+        const newTitle = data?.update_chats_by_pk?.title;
+        
+        if (chatId && newTitle) {
+          const existingChats = cache.readQuery<{ chats: any[] }>({
+            query: GET_CHATS,
+          });
+
+          if (existingChats?.chats) {
+            const updatedChats = existingChats.chats.map(chat => 
+              chat.id === chatId ? { ...chat, title: newTitle } : chat
+            );
+
+            cache.writeQuery({
+              query: GET_CHATS,
+              data: { chats: updatedChats },
+            });
+          }
+        }
+      } catch (error) {
+        console.warn('Cache update error for chat list:', error);
+      }
     },
   });
 
@@ -128,6 +181,18 @@ export default function MessageInput({ chat_id, onMessageSent, disabled = false,
           console.warn('Cache update error:', error);
         }
       },
+    }).then(() => {
+      // Update chat title if this is the first message
+      if (isFirstMessage && onTitleUpdate) {
+        // Truncate message to reasonable title length (max 50 chars)
+        const title = messageText.length > 50 ? messageText.substring(0, 47) + '...' : messageText;
+        updateChat({
+          variables: {
+            id: chat_id,
+            title: title
+          }
+        });
+      }
     }).catch(() => {
       // Only restore message on error
       setMessage(messageText);

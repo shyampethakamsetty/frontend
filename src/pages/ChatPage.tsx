@@ -168,6 +168,19 @@ export default function ChatPage() {
     }, 10000);
   };
 
+  const handleTitleUpdate = (newTitle: string) => {
+    // Update the selected chat title in local state
+    if (selectedChat) {
+      setSelectedChat({
+        ...selectedChat,
+        title: newTitle
+      });
+    }
+    
+    // Refetch chats to update the list
+    refetchChats();
+  };
+
   if (chatsLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-background">
@@ -224,6 +237,7 @@ export default function ChatPage() {
             isLoading={messagesLoading || createChatLoading}
             isTyping={isTyping}
             isMobile={isMobile}
+            onTitleUpdate={handleTitleUpdate}
           />
         </div>
       </div>

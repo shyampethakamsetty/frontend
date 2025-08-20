@@ -9,6 +9,7 @@ interface ChatWindowProps {
   selectedChat: Chat | null;
   messages: Message[];
   onMessageSent: () => void;
+  onTitleUpdate?: (title: string) => void;
   isLoading?: boolean;
   isTyping?: boolean;
   isMobile?: boolean;
@@ -18,6 +19,7 @@ export default function ChatWindow({
   selectedChat, 
   messages, 
   onMessageSent, 
+  onTitleUpdate,
   isLoading = false,
   isTyping = false,
   isMobile = false
@@ -42,9 +44,9 @@ export default function ChatWindow({
 
   if (!selectedChat) {
     return (
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0 chat-window">
         {/* Welcome Message */}
-        <div className="flex-1 flex items-center justify-center bg-background px-4">
+        <div className="messages-container flex items-center justify-center bg-background px-4">
           <div className="text-center max-w-md w-full" data-testid="text-welcome-message">
             <div className="robot-icon mx-auto w-12 h-12 lg:w-16 lg:h-16 flex items-center justify-center mb-4 lg:mb-6">
               <i className="fas fa-robot text-black text-xl lg:text-2xl"></i>
@@ -56,8 +58,8 @@ export default function ChatWindow({
           </div>
         </div>
         
-        {/* Always Show Message Input */}
-        <div className="border-t border-gray-800">
+        {/* Always Show Message Input at Bottom */}
+        <div className="message-input-wrapper">
           <div className="p-3 lg:p-4 bg-muted/20">
             <p className="text-xs lg:text-sm text-muted-foreground text-center mb-3">
               💬 <strong>Ready to chat?</strong> Select a conversation from the sidebar or create a new one
@@ -78,12 +80,12 @@ export default function ChatWindow({
   }
 
   return (
-    <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col min-h-0 chat-window">
       {/* Simplified Chat Header */}
-      <div className="chat-header p-3 lg:p-4 border-b border-gray-800">
+      <div className="chat-header p-3 lg:p-4 border-b border-gray-800 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="min-w-0 flex-1">
-            <h2 className="text-base lg:text-lg font-semibold text-foreground truncate" data-testid="text-chat-title">
+            <h2 className="text-base lg:text-xl font-semibold text-foreground truncate" data-testid="text-chat-title">
               {selectedChat.title}
             </h2>
             <p className="text-xs lg:text-sm text-muted-foreground" data-testid="text-message-count">
@@ -98,7 +100,7 @@ export default function ChatWindow({
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-3 lg:p-6 space-y-4 lg:space-y-6" data-testid="messages-container">
+      <div className="messages-container p-3 lg:p-6 space-y-4 lg:space-y-6" data-testid="messages-container">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center px-4" data-testid="text-no-messages">
@@ -147,13 +149,17 @@ export default function ChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Message Input */}
-      <MessageInput
-        chat_id={selectedChat.id}
-        onMessageSent={handleMessageSent}
-        disabled={isLoading}
-        isMobile={isMobile}
-      />
+      {/* Message Input - Always at bottom */}
+      <div className="message-input-wrapper">
+        <MessageInput
+          chat_id={selectedChat.id}
+          onMessageSent={handleMessageSent}
+          onTitleUpdate={onTitleUpdate}
+          isFirstMessage={messages.length === 0}
+          disabled={isLoading}
+          isMobile={isMobile}
+        />
+      </div>
     </div>
   );
 }

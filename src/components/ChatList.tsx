@@ -90,7 +90,7 @@ export default function ChatList({
       </div>
       
       {/* Chat List */}
-      <div className="flex-1 overflow-y-auto p-3 lg:p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-3 lg:p-4 space-y-3 chat-list">
         {chats.length === 0 ? (
           <div className="text-center py-8" data-testid="text-no-chats">
             <i className="fas fa-comments text-3xl lg:text-4xl text-gray-600 mb-4"></i>

@@ -11,6 +11,17 @@ export const CREATE_CHAT = gql`
   }
 `;
 
+export const UPDATE_CHAT = gql`
+  mutation UpdateChat($id: uuid!, $title: String!) {
+    update_chats_by_pk(pk_columns: { id: $id }, _set: { title: $title }) {
+      id
+      title
+      created_at
+      user_id
+    }
+  }
+`;
+
 export const DELETE_CHAT = gql`
   mutation DeleteChat($id: uuid!) {
     delete_chats(where: { id: { _eq: $id } }) {

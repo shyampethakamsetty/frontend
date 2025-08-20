@@ -50,11 +50,6 @@ export default function Navbar({ currentChatTitle, onMenuClick, isMobile }: Navb
             <h1 className={`font-bold metallic-text ${isMobile ? 'text-lg' : 'text-2xl'}`} data-testid="text-navbar-title">
               AI Chat
             </h1>
-            {currentChatTitle && (
-              <p className={`text-gray-400 mt-1 ${isMobile ? 'text-xs truncate' : 'text-sm'}`} data-testid="text-current-chat">
-                {currentChatTitle}
-              </p>
-            )}
           </div>
         </div>
         
