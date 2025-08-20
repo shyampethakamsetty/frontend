@@ -104,7 +104,7 @@ export default function ChatPage() {
         const latestMessage = data.data.messages[data.data.messages.length - 1];
         
         if (latestMessage && latestMessage.sender === 'bot') {
-          // Hide typing indicator immediately before refetch
+          // Hide typing indicator immediately when AI responds
           setIsTyping(false);
         }
         
@@ -114,6 +114,8 @@ export default function ChatPage() {
     },
     onError: (error) => {
       console.error('Subscription error:', error);
+      // Hide typing indicator on error
+      setIsTyping(false);
     },
   });
 
@@ -133,6 +135,18 @@ export default function ChatPage() {
       }
     }
   }, [messagesData?.messages, isTyping]);
+
+  // Clear typing indicator when switching chats
+  useEffect(() => {
+    setIsTyping(false);
+  }, [selectedChat?.id]);
+
+  // Clear typing indicator when component unmounts
+  useEffect(() => {
+    return () => {
+      setIsTyping(false);
+    };
+  }, []);
 
   const handleCreateNewChat = async () => {
     try {
@@ -162,10 +176,11 @@ export default function ChatPage() {
     // Show typing indicator immediately when user sends message
     setIsTyping(true);
     
-    // Fallback: hide typing indicator after 10 seconds if no AI response
+    // Fallback: hide typing indicator after 15 seconds if no AI response
+    // This prevents the indicator from getting stuck
     setTimeout(() => {
       setIsTyping(false);
-    }, 10000);
+    }, 15000);
   };
 
   const handleTitleUpdate = (newTitle: string) => {

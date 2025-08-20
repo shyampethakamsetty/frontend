@@ -406,6 +406,61 @@
   animation: bounce-soft 1s ease-in-out infinite;
 }
 
+/* Enhanced typing indicator animations */
+@keyframes typing-dot-1 {
+  0%, 20% { transform: translateY(0); }
+  40%, 60% { transform: translateY(-8px); }
+  80%, 100% { transform: translateY(0); }
+}
+
+@keyframes typing-dot-2 {
+  0%, 20% { transform: translateY(0); }
+  40%, 60% { transform: translateY(-8px); }
+  80%, 100% { transform: translateY(0); }
+}
+
+@keyframes typing-dot-3 {
+  0%, 20% { transform: translateY(0); }
+  40%, 60% { transform: translateY(-8px); }
+  80%, 100% { transform: translateY(0); }
+}
+
+.typing-dot-1 {
+  animation: typing-dot-1 1.4s infinite ease-in-out;
+}
+
+.typing-dot-2 {
+  animation: typing-dot-2 1.4s infinite ease-in-out;
+  animation-delay: 0.2s;
+}
+
+.typing-dot-3 {
+  animation: typing-dot-3 1.4s infinite ease-in-out;
+  animation-delay: 0.4s;
+}
+
+/* Enhanced fade-in animation */
+@keyframes enhanced-fade-in {
+  0% { 
+    opacity: 0; 
+    transform: translateY(10px);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0);
+  }
+}
+
+.animate-enhanced-fade-in {
+  animation: enhanced-fade-in 0.3s ease-out forwards;
+}
+
+/* Typing indicator container */
+.typing-indicator {
+  animation: enhanced-fade-in 0.3s ease-out forwards;
+  transform-origin: bottom left;
+}
+
 /* Mobile-specific styles and improvements */
 @media (max-width: 768px) {
   /* Mobile sidebar animations */

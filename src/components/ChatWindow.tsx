@@ -124,20 +124,24 @@ export default function ChatWindow({
 
         {/* Typing Indicator */}
         {isTyping && (
-          <div className="flex justify-start animate-in slide-in-from-bottom-2 duration-200" data-testid="typing-indicator">
+          <div className="flex justify-start typing-indicator" data-testid="typing-indicator">
             <div className="max-w-2xl w-full">
               <div className="flex items-center mb-3 space-x-2">
                 <div className="w-6 h-6 lg:w-8 lg:h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
                   <Bot className="h-3 w-3 lg:h-4 lg:w-4 text-muted-foreground animate-pulse" />
                 </div>
                 <span className="text-xs lg:text-sm font-medium text-muted-foreground">AI Assistant</span>
+                <div className="flex items-center space-x-1">
+                  <span className="text-xs text-muted-foreground">•</span>
+                  <span className="text-xs text-muted-foreground">Processing</span>
+                </div>
               </div>
               <div className="bg-muted rounded-2xl rounded-tl-md p-3 lg:p-4">
                 <div className="flex items-center space-x-2">
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    <div className="w-2 h-2 bg-muted-foreground rounded-full typing-dot-1"></div>
+                    <div className="w-2 h-2 bg-muted-foreground rounded-full typing-dot-2"></div>
+                    <div className="w-2 h-2 bg-muted-foreground rounded-full typing-dot-3"></div>
                   </div>
                   <span className="text-xs lg:text-sm text-muted-foreground">Thinking...</span>
                 </div>
