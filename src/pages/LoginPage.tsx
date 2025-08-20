@@ -92,7 +92,7 @@ export default function LoginPage() {
       <div className="glass-card rounded-2xl p-8 w-full max-w-md animate-fade-in">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2 metallic-text" data-testid="text-app-title">
-            Premium AI Chat
+            AI Chat
           </h1>
           <p className="text-gray-400">Enter your credentials to continue</p>
         </div>
