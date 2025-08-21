@@ -14,7 +14,6 @@ export default function SignupPage() {
     email: '',
     password: '',
     confirmPassword: '',
-    displayName: '',
   });
 
   // Redirect to chat page if already authenticated
@@ -55,14 +54,14 @@ export default function SignupPage() {
     console.log('Signup form submitted for:', formData.email);
     
     try {
-      await signup(formData.email, formData.password, formData.displayName);
+      await signup(formData.email, formData.password);
       console.log('Signup successful, user should be redirected automatically');
       
-      // Show success message with verification info
+      // Show success message
       toast({
         title: 'Account Created Successfully! 🎉',
-        description: 'Verification email sent! Check your inbox and verify your email to complete profile verification. You can login without verification, but verifying gives you full access.',
-        duration: 8000, // Show for 8 seconds to give users time to read
+        description: 'Welcome! Your account has been created and you can now start using the app.',
+        duration: 5000,
       });
       
       // The redirect will happen automatically via the useEffect above
@@ -119,22 +118,6 @@ export default function SignupPage() {
         </div>
         
         <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <Label className="block text-sm font-medium text-gray-300 mb-2">
-              Display Name
-            </Label>
-            <Input
-              type="text"
-              name="displayName"
-              required
-              className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none input-glow text-white placeholder-gray-500"
-              placeholder="Enter your display name"
-              value={formData.displayName}
-              onChange={handleChange}
-              data-testid="input-display-name"
-            />
-          </div>
-
           <div>
             <Label className="block text-sm font-medium text-gray-300 mb-2">
               Email Address

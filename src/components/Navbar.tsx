@@ -59,12 +59,6 @@ export default function Navbar({ currentChatTitle, onMenuClick, isMobile }: Navb
               <div className={`flex items-center space-x-2 lg:space-x-3 cursor-pointer hover:bg-gray-800/50 rounded-lg px-2 lg:px-3 py-2 transition-colors ${isMobile ? 'min-w-0' : ''}`} data-testid="profile-trigger">
                 <div className="user-avatar w-8 h-8 flex items-center justify-center flex-shrink-0 relative">
                   <User className="h-4 w-4 text-black" />
-                  
-                  {/* Profile Incomplete Badge */}
-                  {/* Note: In a real app, this would check actual verification status from Nhost */}
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border border-white">
-                    <i className="fas fa-exclamation text-white text-xs font-bold"></i>
-                  </div>
                 </div>
                 {!isMobile && (
                   <>
@@ -85,13 +79,6 @@ export default function Navbar({ currentChatTitle, onMenuClick, isMobile }: Navb
                   <p className="text-xs leading-none text-muted-foreground">
                     {user?.email}
                   </p>
-                  {/* Verification Status */}
-                  <div className="flex items-center space-x-2 mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <span className="text-xs text-yellow-700 dark:text-yellow-300">
-                      Email verification required
-                    </span>
-                  </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
