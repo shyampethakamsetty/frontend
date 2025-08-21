@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { useMutation } from '@apollo/client';
 import { nhost } from '@/lib/apollo-client';
+import { UPDATE_USER } from '@/graphql/mutations';
 import type { User } from '@/types/graphql';
 
 interface AuthContextType {
@@ -11,6 +13,7 @@ interface AuthContextType {
   signup: (email: string, password: string, displayName?: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshAuth: () => Promise<void>;
+  updateUserProfile: (userId: string, displayName: string) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -19,6 +22,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // GraphQL mutation for updating user profile
+  const [updateUser] = useMutation(UPDATE_USER);
 
   // Retry configuration
   const MAX_RETRIES = 3;
@@ -156,19 +162,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (email: string, password: string, displayName?: string) => {
     setIsLoading(true);
     try {
-      const { error } = await retryOperation(() => 
+      // Step 1: Basic signup with Nhost (email + password only)
+      const { error: signupError, user: nhostUser } = await retryOperation(() => 
         nhost.auth.signUp({
           email,
           password,
-          options: {
-            displayName: displayName || email,
-          },
         })
       );
 
-      if (error) {
-        throw new Error(error.message);
+      if (signupError) {
+        throw new Error(signupError.message);
       }
+
+      // Step 2: Update user profile via GraphQL if displayName provided
+      if (displayName && nhostUser) {
+        try {
+          await updateUser({
+            variables: {
+              id: nhostUser.id,
+              displayName: displayName
+            }
+          });
+          
+          console.log('User profile updated successfully with displayName:', displayName);
+        } catch (profileError) {
+          console.warn('Failed to update user profile, but signup was successful:', profileError);
+          // Don't fail the entire signup if profile update fails
+          // The user can still use the app and update their profile later
+        }
+      }
+
+      console.log('Signup completed successfully');
     } catch (error) {
       throw error;
     } finally {
@@ -197,7 +221,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUserProfile = async (userId: string, displayName: string) => {
+    try {
+      const { data } = await updateUser({
+        variables: {
+          id: userId,
+          displayName: displayName
+        }
+      });
 
+      if (data?.updateUser) {
+        // Update local user state
+        setUser(prevUser => prevUser ? {
+          ...prevUser,
+          displayName: data.updateUser.displayName
+        } : null);
+        
+        return data.updateUser;
+      }
+    } catch (error) {
+      console.error('Failed to update user profile:', error);
+      throw error;
+    }
+  };
 
   return (
     <AuthContext.Provider value={{
@@ -209,6 +255,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signup,
       logout,
       refreshAuth,
+      updateUserProfile,
     }}>
       {children}
     </AuthContext.Provider>

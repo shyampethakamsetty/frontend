@@ -22,6 +22,17 @@ export const UPDATE_CHAT = gql`
   }
 `;
 
+export const UPDATE_USER = gql`
+  mutation UpdateUser($id: uuid!, $displayName: String!) {
+    updateUser(pk_columns: { id: $id }, _set: { displayName: $displayName }) {
+      id
+      displayName
+      email
+      createdAt
+    }
+  }
+`;
+
 export const DELETE_CHAT = gql`
   mutation DeleteChat($id: uuid!) {
     delete_chats(where: { id: { _eq: $id } }) {

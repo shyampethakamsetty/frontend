@@ -32,6 +32,15 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (formData.password.length < 8) {
+      toast({
+        title: 'Password Too Short',
+        description: 'Password must be at least 8 characters long',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     console.log('Login form submitted for:', formData.email);
     
     try {
@@ -122,12 +131,14 @@ export default function LoginPage() {
               type="password"
               name="password"
               required
+              minLength={8}
               className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none input-glow text-white placeholder-gray-500"
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
               data-testid="input-password"
             />
+            <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
           </div>
           
           <Button

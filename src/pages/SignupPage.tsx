@@ -43,10 +43,10 @@ export default function SignupPage() {
       return;
     }
 
-    if (formData.password.length < 6) {
+    if (formData.password.length < 8) {
       toast({
         title: 'Password Too Short',
-        description: 'Password must be at least 6 characters long',
+        description: 'Password must be at least 8 characters long',
         variant: 'destructive',
       });
       return;
@@ -58,10 +58,11 @@ export default function SignupPage() {
       await signup(formData.email, formData.password, formData.displayName);
       console.log('Signup successful, user should be redirected automatically');
       
-      // Show success message
+      // Show success message with verification info
       toast({
-        title: 'Account Created',
-        description: 'Welcome! Your account has been created successfully.',
+        title: 'Account Created Successfully! 🎉',
+        description: 'Verification email sent! Check your inbox and verify your email to complete profile verification. You can login without verification, but verifying gives you full access.',
+        duration: 8000, // Show for 8 seconds to give users time to read
       });
       
       // The redirect will happen automatically via the useEffect above
@@ -158,14 +159,14 @@ export default function SignupPage() {
               type="password"
               name="password"
               required
-              minLength={6}
+              minLength={8}
               className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none input-glow text-white placeholder-gray-500"
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
               data-testid="input-password"
             />
-            <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+            <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
           </div>
           
           <div>

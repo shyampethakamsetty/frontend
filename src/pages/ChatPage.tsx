@@ -15,6 +15,7 @@ export default function ChatPage() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showVerificationBanner, setShowVerificationBanner] = useState(true);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -217,6 +218,46 @@ export default function ChatPage() {
         onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
         isMobile={isMobile}
       />
+      
+      {/* Email Verification Reminder Banner */}
+      {showVerificationBanner && (
+        <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border-b border-blue-500/30 px-4 py-3">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              <div className="flex items-center space-x-2">
+                <i className="fas fa-envelope text-blue-400"></i>
+                <span className="text-sm text-blue-200">
+                  <strong>Verify your email</strong> to unlock full features and ensure account security
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-blue-300">Check your inbox for verification link</span>
+              <button 
+                onClick={() => {
+                  toast({
+                    title: 'Verification Email',
+                    description: 'If you didn\'t receive the email, check your spam folder or contact support.',
+                    duration: 5000,
+                  });
+                }}
+                className="text-xs text-blue-400 hover:text-blue-300 underline cursor-pointer"
+              >
+                Need help?
+              </button>
+              <button
+                onClick={() => setShowVerificationBanner(false)}
+                className="text-xs text-blue-400 hover:text-blue-300 ml-2"
+                title="Dismiss banner"
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="flex-1 flex overflow-hidden relative">
         {/* Mobile Sidebar Overlay */}
         {isMobile && isSidebarOpen && (
