@@ -13,7 +13,6 @@ export default function SignupPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    confirmPassword: '',
   });
 
   // Redirect to chat page if already authenticated
@@ -33,15 +32,6 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: 'Password Mismatch',
-        description: 'Passwords do not match',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     if (formData.password.length < 8) {
       toast({
         title: 'Password Too Short',
@@ -150,22 +140,6 @@ export default function SignupPage() {
               data-testid="input-password"
             />
             <p className="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
-          </div>
-          
-          <div>
-            <Label className="block text-sm font-medium text-gray-300 mb-2">
-              Confirm Password
-            </Label>
-            <Input
-              type="password"
-              name="confirmPassword"
-              required
-              className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700 rounded-lg focus:outline-none input-glow text-white placeholder-gray-500"
-              placeholder="••••••••"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              data-testid="input-confirm-password"
-            />
           </div>
           
           <Button
