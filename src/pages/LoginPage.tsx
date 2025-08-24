@@ -153,7 +153,7 @@ export default function LoginPage() {
                 Signing In...
               </>
             ) : (
-              'Sign In'
+              'Login'
             )}
           </Button>
         </form>
@@ -162,7 +162,7 @@ export default function LoginPage() {
           <p className="text-gray-400">
             Don't have an account?{' '}
             <Link href="/signup" className="text-gray-200 hover:text-white font-semibold transition-colors" data-testid="link-signup">
-              Sign Up
+              Register
             </Link>
           </p>
         </div>
