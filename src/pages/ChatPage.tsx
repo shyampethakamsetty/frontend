@@ -176,11 +176,11 @@ export default function ChatPage() {
     // Show typing indicator immediately when user sends message
     setIsTyping(true);
     
-    // Fallback: hide typing indicator after 15 seconds if no AI response
+    // Fallback: hide typing indicator after 30 seconds if no AI response
     // This prevents the indicator from getting stuck
     setTimeout(() => {
       setIsTyping(false);
-    }, 15000);
+    }, 30000);
   };
 
   const handleTitleUpdate = (newTitle: string) => {
